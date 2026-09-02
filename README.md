@@ -13,6 +13,9 @@
  Order Summary: Check the total price before checkout.
  
 ### Technologies Used
+
   HTML5: For the page structure and content.
+  
   CSS3: For styling, colors, and layout design.
+  
   JavaScript: For cart logic, buttons, and dynamic updates.Project Structure
