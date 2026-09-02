@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshBite - Online Food Ordering</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="#home" class="logo">🍕 FreshBite</a>
+        
+            <ul class="nav-links">
+                <li>
+                    <a href="#home">Home</a>
+                </li>
+                <li>
+                    <a href="#restaurant">Restaurant</a>
+                </li>
+                <li>
+                    <a href="#menu">Menu</a>
+                </li>
+                <li>
+                    <a href="#cart" class="cart-btn">
+                        <i class="fas fa-shopping-basket"></i>
+                        Cart(<span class="cart-count">0</span>)</a>
+                </li>
+                <li>
+                    <a href="#account" id="nav-account-link">
+                        <i class="fas fa-user"></i>
+                        Account</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <section id="home">
+        <div class="hero">
+            <div class="container hero-content">
+                <h1>Crave-Worthy Meals Delivered To Your Doorstep</h1>
+                <p>Fresh ingredients, award-winning chefs, and speedy warm delivery.</p>
+                <div class="hero-actions">
+                    <a href="#menu" class="btn btn-primary">Explore Menu</a>
+                    <a href="#restaurant" class="btn btn-secondary">Browse Restaurant</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="cointainer offers-banner">
+            <div class="offer-card">
+                <i class="fas fa-percentage offer-icon"></i>
+                <div>
+                    <h3>50% Off Your First Order</h3>
+                    <p>Use code <strong>FRESH50</strong> at checkout</p>
+                </div>
+            </div>
+            <div class="offer-card">
+                <i class="fas fa-shipping-fast offer-icon"></i>
+                <div>
+                    <h3>Free Delivery Over $30</h3>
+                    <p>Applies automatically to your order</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="container section-padding">
+            <h2 class="section-title">Explore by Category</h2>
+            <div class="category-grid" id="category-container"></div>
+        </div>
+
+    </section>
+    <section id="restaurant" class="section-padding bg-alt">
+        <div class="container">
+            <h2 class="section-title">Partner Restaurants</h2>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label>Cuisine:</label>
+                    <select id="filter-cuisine" onchange="filterRestaurants()">
+                        <option value="All">All Cuisines</option>
+                        <option value="Italian">Italian</option>
+                        <option value="American">American</option>
+                        <option value="Japanese">Japanese</option>
+                        <option value="Mexican">Mexican</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Price Range:</label>
+                    <select id="filter-price" onchange="filterRestaurants()">
+                        <option value="All">All Price</option>
+                        <option value="$">$ (Budget)</option>
+                        <option value="$$">$$ (Standard)</option>
+                        <option value="$$$">$$$ (Premium)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Min Rating:</label>
+                    <select id="filter-rating" onchange="filterRestaurants()">
+                        <option value="0">All Ratings</option>
+                        <option value="4.5">4.5+ ⭐</option>
+                        <option value="4.8">4.8+ ⭐</option> 
+                    </select>
+                </div>
+            </div>
+            <div class="grid" id="restaurant-grid"></div>
+        </div>
+    </section>
+
+    <section id="menu" class="section-padding">
+        <div class="container">
+            <h2 class="section-title">Our Food Menu</h2>
+            <div class="dietary-tabs">
+                <button class="tab-btn active" onclick="filterMenu('All',this)">All Items</button>
+                <button class="tab-btn" onclick="filterMenu('Veg', this)">🌱 Vegetarian</button>
+                <button class="tab-btn" onclick="filterMenu('Non-Veg', this)">🍗 Non-Vegetarian</button>
+                <button class="tab-btn" onclick="filterMenu('Gluten-Free', this)">🌾 Gluten-Free</button>
+            </div>
+            <div class="grid" id="menu-grid"></div>
+        </div>
+    </section>
+
+    <section id="cart" class="section-padding bg-alt">
+        <div class="container">
+            <h2 class="section-title">Your Shopping Basket</h2>
+            <div class="cart-layout">
+                <div class="cart-items" id="cart-items-container">
+
+                </div>
+                <div class="cart-summary-card">
+                    <h3>
+                        Order Summary
+                    </h3>
+                    <div class="summary-line">
+                        <span>Subtotal</span><span id="summary-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Delivery Fee</span><span id="summary-delivery">$0.00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Discount</span><span id="summary-discount">-$0.00</span>
+                    </div>
+                    <hr>
+                    <div class="summary-line total-line">
+                        <span>Total</span><span id="summary-total">$0.00</span>
+                    </div>
+                    <a href="#checkout" class="btn btn-primary btn-block" id="proceed-btn" style="margin-top: 1rem; text-align: center;">
+                        Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="checkout" class="section-padding">
+        <div class="container checkout-container">
+            <h2 class="section-title">Checkout</h2>
+            <form id="checkout-form" onsubmit="handlePlaceOrder(event)">
+                <div class="checkout-grid">
+                    <div class="checkout-form-block">
+                        <h3>Delivery Address</h3>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="cust-name" required placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <label>Street Address</label>
+                            <input type="text" id="cust-address" required placeholder="Address field">
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Phone</label>
+                            <input type="tel" id="cust-phone" required placeholder="(555) 019-2834">
+                        </div>
+                         <div class="form-group">
+                            <label>Delivery Time</label>
+                            <select id="cust-time">
+                                <option value="ASAP (30-45 mins)">ASAP (30-45 mins)</option>
+                                <option value="Today: In 1 Hour">Today: In 1 Hour</option>
+                                <option value="Today: In 2 Hours">Today: In 2 Hours</option>
+                            </select>
+                        </div>
+                </div>
+                <div class="checkout-form-block">
+                     <h3>Payment & Confirmation</h3>
+                     <div class="form-group">
+                        <label>Payment Method</label>
+                        <select id="cust-payment">
+                            <option value="Credit/Debit Card">Credit/Debit Card </option>
+                            <option value="Apple Pay / Google Pay">UPI</option>
+                            <option value="Cash on Delivery">Cash on Delivery</option>
+                        </select>
+                     </div>
+                     <div class="form-group">
+                        <label>Promo Code</label>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="promo-input" placeholder="e.g. FRESH50">
+                            <button type="button" class="btn btn-secondary" onclick="applyPromo()">Apply</button>
+                        </div>
+                     </div>
+                     <div class="checkout-final-summary" id="checkout-total-box">
+
+                     </div>
+                    <button type="submit" class="btn btn-primary btn-block">Place Order Now</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section id="account" class="section-padding bg-alt">
+        <div class="container" style="max-width: 800px;">
+            <div class="auth-box" id="auth-panel">
+                <div class="dietary-tab">
+                    <button class="tab-btn active" onclick="switchAuthTab('login', this)">Login</button>
+                    <button class="tab-btn" onclick="switchAuthTab('register', this)">Register</button>
+                </div>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" required placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+                <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="reg-email" required placeholder="abc@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" required >
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+            </div>
+
+            <div id="profile-panel" class="hidden auth-box">
+                <div style="display: flex; justify-content: space-between ; align-items: center ; margin-bottom: 1.5rem;">
+                    <div>
+                        <h3 id="user-display-name">Welcome Back!</h3>
+                        <p id="user-display-email" style="color: #666; font-size: 0.9rem;"></p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="handleLogout()">Sign Out</button>
+                </div>
+                <h4>Recent Orders</h4>
+                <div id="order-history-list" style="margin-top: 1rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding">
+        <div class="container about-container">
+            <h2 class="section-title">Our Story</h2>
+            <p class="about-lead">Founded in 2024, FreshBite connects food lovers with the most authentic artisanal kitchens and local culinary pioneers.</p>
+            <div class="grid" style="margin-top: 2rem;">
+                <div class="card text-center">
+                    <i class="fas fa-award icon-large"></i>
+                    <h3>Culinary Excellence</h3>
+                    <p>Recognized as the Best Regional Delivery Network 2025.</p>
+                </div>
+                <div class="card text-center">
+                    <i class="fas fa-leaf icon-large"></i>
+                    <h3>Eco & Fresh</h3>
+                    <p>100% compostable packaging and locally sourced produce.</p>
+                </div>
+                <div class="card text-center">
+                    <i class="fas fa-users icon-large"></i>
+                    <h3>Passionate Team</h3>
+                    <p>Led by Master Chefs and delivery logistics experts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section-padding bg-alt">
+        <div class="container contact-grid">
+            <div class="contact-info">
+                <h2 class="section-title" style="text-align: left;">Get In Touch</h2>
+                <p><i class="fas fa-map-marker-alt"></i> Sector 9 Cuttack, Cuttack District,</p>
+                <p><i class="fas fa-phone"></i> +91 (500) 555-BITE</p>
+                <p><i class="fas fa-clock"></i> Mon-Sun: 9:00 AM - 11:00 PM</p>
+            </div>
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Thank you for contacting FreshBite! We will respond shortly'); this.reset();">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" required placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required placeholder="abc@domain.com">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea rows="4" required placeholder="How can we help you?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeProductModal()">&times;</span>
+            <div id="modal-details"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
