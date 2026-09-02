@@ -20,7 +20,7 @@ const foodItems = [
         veg: false,
         tag: "Non-Veg",
         featured: true,
-        description: "Charbroiled Angus patty, aged cheddar, Applewood smoked bacon, and house .",
+        description: "Charbroiled Angus patty, aged cheddar, Applewood smoked bacon, and house sauce.",
         ingredients: ["Angus Beef Patty", "Brioche Bun", "Aged Cheddar", "Smoked Bacon", "Pickles"],
         nutrition: { calories: "820 kcal", carbs: "48g", protein: "44g" },
         image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80"
@@ -33,7 +33,7 @@ const foodItems = [
         veg: true,
         tag: "Gluten-Free",
         featured: true,
-        description: "Organic brown rice, charred corn, black beans, citrus guacamole, and pico de gallo.",
+        description: "Organic brown rice, charred corn, black beans, citrus guacamole, and cilantro.",
         ingredients: ["Organic Brown Rice", "Avocado", "Black Beans", "Sweet Corn", "Cilantro Lime Dressing"],
         nutrition: { calories: "450 kcal", carbs: "58g", protein: "14g" },
         image: "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=500&q=80"
@@ -75,19 +75,20 @@ const restaurants = [
 
 const categories = ["All", "Pizza", "Burgers", "Bowls", "Tacos", "Desserts"];
 
-let cart =  [];
+let cart = JSON.parse(localStorage.getItem('freshbite_cart')) || [];
 let discountRate = 0;
-
 
 document.addEventListener('DOMContentLoaded', () => {
     renderCategories();
+    renderFeaturedDishes();
     renderRestaurants(restaurants);
     renderMenu(foodItems);
     updateCartUI();
     checkAuthSession();
-    window.addEventListener('click', (event) => {
+
+    window.addEventListener('click', (e) => {
         const modal = document.getElementById('product-modal');
-        if (event.target === modal) {
+        if (e.target === modal) {
             closeProductModal();
         }
     });
@@ -99,6 +100,13 @@ function renderCategories() {
     container.innerHTML = categories.map(cat => `
         <div class="category-badge" onclick="filterMenuByCategory('${cat}')">${cat}</div>
     `).join('');
+}
+
+function renderFeaturedDishes() {
+    const container = document.getElementById('featured-dishes');
+    if (!container) return;
+    const featured = foodItems.filter(item => item.featured);
+    container.innerHTML = featured.map(item => createDishCard(item)).join('');
 }
 
 function renderRestaurants(list) {
@@ -118,7 +126,7 @@ function renderRestaurants(list) {
                     <h3 class="card-title">${r.name}</h3>
                     <span style="font-weight: 700; color: #E65100;">★ ${r.rating}</span>
                 </div>
-                <p class="card-desc">${r.cuisine} Cuisine • Price Level: ${r.price}</p>
+                <p class="card-desc">${r.cuisine} Cuisine • Price: ${r.price}</p>
                 <a href="#menu" class="btn btn-secondary text-center">View Menu</a>
             </div>
         </div>
@@ -158,6 +166,7 @@ function createDishCard(item) {
     `;
 }
 
+
 function filterRestaurants() {
     const cuisine = document.getElementById('filter-cuisine').value;
     const price = document.getElementById('filter-price').value;
@@ -184,7 +193,9 @@ function filterMenu(tag, btn) {
 
 function filterMenuByCategory(category) {
     window.location.hash = "#menu";
-    const filtered = category === 'All' ? foodItems : foodItems.filter(item => item.category.toLowerCase() === category.toLowerCase());
+    const filtered = category === 'All' 
+        ? foodItems 
+        : foodItems.filter(item => item.category.toLowerCase().startsWith(category.toLowerCase().slice(0, 4)));
     renderMenu(filtered);
 }
 
@@ -214,7 +225,6 @@ function adjustQuantity(itemId, delta) {
     if (itemIndex === -1) return;
 
     cart[itemIndex].quantity += delta;
-
     if (cart[itemIndex].quantity <= 0) {
         cart.splice(itemIndex, 1);
     }
@@ -293,47 +303,11 @@ function applyPromo() {
 
     if (code === "FRESH50") {
         discountRate = 0.5;
-        alert("Success! 50% discount has been applied to your subtotal.");
+        alert("Coupon Applied: 50% discount added to your subtotal!");
     } else {
-        alert("Invalid promo code. Try entering FRESH50");
+        alert("Invalid coupon code. Try entering FRESH50");
     }
     updateCartUI();
-}
-
-function handlePlaceOrder(e) {
-    e.preventDefault();
-
-    if (cart.length === 0) {
-        alert("Your cart is empty! Please add items before placing an order.");
-        return;
-    }
-
-    const orderData = {
-        id: "FB-" + Math.floor(100000 + Math.random() * 900000),
-        name: document.getElementById('cust-name').value,
-        address: document.getElementById('cust-address').value,
-        phone: document.getElementById('cust-phone').value,
-        time: document.getElementById('cust-time').value,
-        payment: document.getElementById('cust-payment').value,
-        total: document.getElementById('summary-total') ? document.getElementById('summary-total').textContent : "$0.00",
-        date: new Date().toLocaleDateString()
-    };
-
-    const orders = [];
-    orders.unshift(orderData);
-    localStorage.setItem('freshbite_orders', JSON.stringify(orders));
-
-    cart = [];
-    discountRate = 0;
-    saveCart();
-    updateCartUI();
-
-    const promoInput = document.getElementById('promo-input');
-    if (promoInput) promoInput.value = '';
-
-    alert(`Order Confirmed!\nReference ID: ${orderData.id}\nEstimated Delivery: ${orderData.time}`);
-    window.location.hash = "#account";
-    checkAuthSession();
 }
 
 function openProductModal(itemId) {
@@ -342,6 +316,8 @@ function openProductModal(itemId) {
 
     const modal = document.getElementById('product-modal');
     const details = document.getElementById('modal-details');
+
+    if (!modal || !details) return;
 
     details.innerHTML = `
         <img src="${item.image}" style="width:100%; height:200px; object-fit:cover; border-radius:8px;" alt="${item.name}">
@@ -400,13 +376,14 @@ function handleRegister(e) {
         return;
     }
 
-    const registeredUsers =  [];
+    const registeredUsers = JSON.parse(localStorage.getItem('freshbite_registered_users')) || [];
 
     const userExists = registeredUsers.some(u => u.email === email);
     if (userExists) {
         alert("An account with this email address already exists. Please log in.");
         return;
     }
+
 
     const newUser = { id: Date.now(), name, email, password };
     registeredUsers.push(newUser);
@@ -422,6 +399,7 @@ function handleRegister(e) {
     checkAuthSession();
 }
 
+
 function handleLogin(e) {
     e.preventDefault();
 
@@ -431,7 +409,7 @@ function handleLogin(e) {
     const email = emailInput.value.trim().toLowerCase();
     const password = passInput.value;
 
-    const registeredUsers = [];
+    const registeredUsers = JSON.parse(localStorage.getItem('freshbite_registered_users')) || [];
 
     const matchedUser = registeredUsers.find(u => u.email === email);
     if (!matchedUser) {
@@ -439,10 +417,12 @@ function handleLogin(e) {
         return;
     }
 
+  
     if (matchedUser.password !== password) {
         alert("Incorrect password. Please verify your credentials and try again.");
         return;
     }
+
 
     localStorage.setItem('freshbite_current_user', JSON.stringify({ name: matchedUser.name, email: matchedUser.email }));
 
@@ -494,6 +474,7 @@ function checkAuthSession() {
     }
 }
 
+
 function handlePlaceOrder(e) {
     e.preventDefault();
 
@@ -522,7 +503,7 @@ function handlePlaceOrder(e) {
         date: new Date().toLocaleDateString()
     };
 
-    const allOrders =  [];
+    const allOrders = JSON.parse(localStorage.getItem('freshbite_orders')) || [];
     allOrders.unshift(orderData);
     localStorage.setItem('freshbite_orders', JSON.stringify(allOrders));
 
@@ -539,9 +520,8 @@ function handlePlaceOrder(e) {
     checkAuthSession();
 }
 
-
 function renderUserOrderHistory(userEmail) {
-    const allOrders =  [];
+    const allOrders = JSON.parse(localStorage.getItem('freshbite_orders')) || [];
     const userOrders = allOrders.filter(o => o.userEmail === userEmail);
     const container = document.getElementById('order-history-list');
     if (!container) return;
